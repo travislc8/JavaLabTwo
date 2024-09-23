@@ -32,7 +32,7 @@ public abstract class Event implements Comparable<Event> {
     }
 
     public int compareTo(Event e) {
-        return -(this.dateTime.compareTo(e.getDateTime()));
+        return (this.dateTime.compareTo(e.getDateTime()));
     }
 
 }
