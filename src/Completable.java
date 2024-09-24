@@ -1,3 +1,5 @@
+package src;
+
 public interface Completable {
     public void complete();
 

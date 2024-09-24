@@ -1,3 +1,5 @@
+package src;
+
 import java.lang.Comparable;
 import java.time.LocalDateTime;
 
@@ -34,5 +36,9 @@ public abstract class Event implements Comparable<Event> {
     public int compareTo(Event e) {
         return (this.dateTime.compareTo(e.getDateTime()));
     }
+
+    public abstract void complete();
+
+    public abstract boolean isComplete();
 
 }

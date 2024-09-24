@@ -1,12 +1,19 @@
+package src;
+
 import java.time.LocalDateTime;
 import java.time.Duration;
 
 public class Meeting extends Event implements Completable {
     private LocalDateTime endDateTime;
     private String location;
-    private boolean complete;
+    private boolean complete = false;
 
     public Meeting() {
+        setName("default name");
+        location = "default location";
+        setDateTime(LocalDateTime.now());
+        LocalDateTime temp = getDateTime().plusHours(1);
+        setEndDateTime(temp);
     }
 
     public Meeting(String name, LocalDateTime start, LocalDateTime end, String location) {
