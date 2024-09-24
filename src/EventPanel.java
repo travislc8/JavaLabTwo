@@ -12,40 +12,24 @@ import java.awt.event.ActionEvent;
 public class EventPanel extends JPanel implements ActionListener {
     private Event event;
     private JButton completeButton;
+    private JLabel complete;
 
     public EventPanel() {
-        event = new Deadline("default", LocalDateTime.now());
-        completeButton = new JButton("Complete");
-
         // sets the Event Panel
         this.setPreferredSize(new Dimension(200, 200));
         // this.setLayout(new GridLayout(0, 1));
         this.setBackground(Color.lightGray);
 
-        // sets the values shared by meeting and deadline
-    }
+        event = new Deadline("default", LocalDateTime.now());
+        completeButton = new JButton("Complete");
+        this.add(completeButton);
 
-    public EventPanel(Deadline event) {
-        this();
-        this.event = event;
+        // sets up panel
+        this.setLayout(new GridLayout(0, 1));
 
-        // sets up complete button
-        completeButton.addActionListener(this);
-    }
-
-    public EventPanel(Meeting event) {
-        this();
-        this.event = event;
-
-        // sets up complete button
-        completeButton.addActionListener(this);
-    }
-
-    protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
-        System.out.println("paint");
         this.setSharedValues();
 
+        // sets the values shared by meeting and deadline
         if (event instanceof Deadline deadline) {
             System.out.println("deadline");
             setDeadlineValues(deadline);
@@ -54,13 +38,45 @@ public class EventPanel extends JPanel implements ActionListener {
             setMeetingValues(meeting);
         } else
             System.out.println("bad");
+        completeButton.addActionListener(this);
+    }
+
+    public EventPanel(Event event) {
+        // sets the Event Panel
+        this.setPreferredSize(new Dimension(200, 200));
+        // this.setLayout(new GridLayout(0, 1));
+        this.setBackground(Color.lightGray);
+        this.setLayout(new GridLayout(0, 1));
+
+        completeButton = new JButton("Complete");
+        this.add(completeButton);
+
+        this.event = event;
+
+        this.setSharedValues();
+
+        // sets the values shared by meeting and deadline
+        if (event instanceof Deadline deadline) {
+            System.out.println("deadline");
+            setDeadlineValues(deadline);
+        } else if (event instanceof Meeting meeting) {
+            System.out.println("meeting");
+            setMeetingValues(meeting);
+        } else
+            System.out.println("bad");
+        completeButton.addActionListener(this);
     }
 
     public void actionPerformed(ActionEvent e) {
         this.event.complete();
-        removeAll();
-        validate();
-        repaint();
+        String complete_string = "";
+        if (event.isComplete())
+            complete_string = "Meeting is complete.";
+        else
+            complete_string = "Meeting is yet to come.";
+        complete.setText(complete_string);
+        this.remove(completeButton);
+        this.repaint();
 
     }
 
@@ -71,8 +87,7 @@ public class EventPanel extends JPanel implements ActionListener {
             complete_string = "Meeting is complete.";
         else
             complete_string = "Meeting is yet to come.";
-
-        JLabel complete = new JLabel(complete_string);
+        complete = new JLabel(complete_string);
         this.add(complete);
 
     }
@@ -85,7 +100,7 @@ public class EventPanel extends JPanel implements ActionListener {
         else
             complete_string = "Meeting is yet to come.";
 
-        JLabel complete = new JLabel(complete_string);
+        complete = new JLabel(complete_string);
         this.add(complete);
 
         // sets the location
@@ -104,6 +119,7 @@ public class EventPanel extends JPanel implements ActionListener {
     }
 
     private void setSharedValues() {
+        this.add(completeButton);
         // set the name
         JLabel name = new JLabel(event.getName());
         this.add(name);
@@ -127,8 +143,6 @@ public class EventPanel extends JPanel implements ActionListener {
 
         JLabel time = new JLabel(timeString);
         this.add(time);
-
-        this.add(completeButton);
 
     }
 }

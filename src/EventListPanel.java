@@ -33,12 +33,12 @@ public class EventListPanel extends JPanel {
         constraints.gridy = 0;
         displayPanel.add(panel, constraints);
 
-        panel = new EventPanel(new Meeting());
+        EventPanel panel2 = new EventPanel(new Meeting());
         constraints.weightx = .3;
         constraints.weighty = .5;
         constraints.gridx = 1;
         constraints.gridy = 0;
-        displayPanel.add(panel, constraints);
+        displayPanel.add(panel2, constraints);
 
     }
 
