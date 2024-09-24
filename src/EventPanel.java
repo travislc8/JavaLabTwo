@@ -16,13 +16,9 @@ public class EventPanel extends JPanel implements ActionListener {
 
     public EventPanel() {
         // sets the Event Panel
-        this.setPreferredSize(new Dimension(200, 200));
+        this.setPreferredSize(new Dimension(100, 100));
         // this.setLayout(new GridLayout(0, 1));
         this.setBackground(Color.lightGray);
-
-        event = new Deadline("default", LocalDateTime.now());
-        completeButton = new JButton("Complete");
-        this.add(completeButton);
 
         // sets up panel
         this.setLayout(new GridLayout(0, 1));
@@ -31,13 +27,15 @@ public class EventPanel extends JPanel implements ActionListener {
 
         // sets the values shared by meeting and deadline
         if (event instanceof Deadline deadline) {
-            System.out.println("deadline");
             setDeadlineValues(deadline);
         } else if (event instanceof Meeting meeting) {
-            System.out.println("meeting");
             setMeetingValues(meeting);
         } else
             System.out.println("bad");
+
+        event = new Deadline("default", LocalDateTime.now());
+        completeButton = new JButton("Complete");
+        this.add(completeButton);
         completeButton.addActionListener(this);
     }
 
@@ -57,10 +55,8 @@ public class EventPanel extends JPanel implements ActionListener {
 
         // sets the values shared by meeting and deadline
         if (event instanceof Deadline deadline) {
-            System.out.println("deadline");
             setDeadlineValues(deadline);
         } else if (event instanceof Meeting meeting) {
-            System.out.println("meeting");
             setMeetingValues(meeting);
         } else
             System.out.println("bad");
