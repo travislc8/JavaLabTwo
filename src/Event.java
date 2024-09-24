@@ -34,7 +34,6 @@ public abstract class Event implements Comparable<Event> {
     }
 
     public int compareTo(Event e) {
-        System.out.println("test");
         return (this.dateTime.compareTo(e.getDateTime()));
     }
 
