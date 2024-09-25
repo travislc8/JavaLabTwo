@@ -14,62 +14,40 @@ public class EventPanel extends JPanel implements ActionListener {
     private JButton completeButton;
     private JLabel complete;
 
-    public EventPanel() {
-        // sets the Event Panel
-        this.setPreferredSize(new Dimension(100, 100));
-        // this.setLayout(new GridLayout(0, 1));
-        this.setBackground(Color.lightGray);
-
-        // sets up panel
-        this.setLayout(new GridLayout(0, 1));
-
-        this.setSharedValues();
-
-        // sets the values shared by meeting and deadline
-        if (event instanceof Deadline deadline) {
-            setDeadlineValues(deadline);
-        } else if (event instanceof Meeting meeting) {
-            setMeetingValues(meeting);
-        } else
-            System.out.println("bad");
-
-        event = new Deadline("default", LocalDateTime.now());
-        completeButton = new JButton("Complete");
-        this.add(completeButton);
-        completeButton.addActionListener(this);
-    }
-
     public EventPanel(Event event) {
         // sets the Event Panel
         this.setPreferredSize(new Dimension(200, 200));
-        // this.setLayout(new GridLayout(0, 1));
         this.setBackground(Color.lightGray);
         this.setLayout(new GridLayout(0, 1));
-
-        completeButton = new JButton("Complete");
-        this.add(completeButton);
+        this.setBorder(BorderFactory.createLineBorder(Color.black));
 
         this.event = event;
 
         this.setSharedValues();
 
-        // sets the values shared by meeting and deadline
+        // sets the values not shared by meeting and deadline
         if (event instanceof Deadline deadline) {
             setDeadlineValues(deadline);
         } else if (event instanceof Meeting meeting) {
             setMeetingValues(meeting);
         } else
             System.out.println("bad");
-        completeButton.addActionListener(this);
+
+        // add complete button if it is not complete
+        if (!event.isComplete()) {
+            completeButton = new JButton("Complete");
+            completeButton.addActionListener(this);
+            this.add(completeButton);
+        }
     }
 
     public void actionPerformed(ActionEvent e) {
         this.event.complete();
         String complete_string = "";
         if (event.isComplete())
-            complete_string = "Meeting is complete.";
+            complete_string = "Event is complete";
         else
-            complete_string = "Meeting is yet to come.";
+            complete_string = "Event is not complete";
         complete.setText(complete_string);
         this.remove(completeButton);
         this.repaint();
@@ -82,13 +60,29 @@ public class EventPanel extends JPanel implements ActionListener {
         if (event.isComplete())
             complete_string = "Meeting is complete.";
         else
-            complete_string = "Meeting is yet to come.";
+            complete_string = "Event is yet to come.";
         complete = new JLabel(complete_string);
         this.add(complete);
 
     }
 
     private void setMeetingValues(Meeting event) {
+
+        // sets the location
+        String location_string = "Location: " + event.getLocation();
+        JLabel location = new JLabel(location_string);
+        this.add(location);
+
+        // sets the duration
+        Duration duration = event.getDuration();
+        int hours = Math.round(duration.getSeconds() / 3600);
+        int minutes = Math.round((duration.getSeconds() - hours * 3600) / 60);
+        String duration_string = "Duration = " + hours + " hours";
+        if (minutes > 0)
+            duration_string += " & " + minutes + " minutes";
+        JLabel duration_label = new JLabel(duration_string);
+        this.add(duration_label);
+        //
         // sets the completion message
         String complete_string;
         if (event.isComplete())
@@ -98,38 +92,24 @@ public class EventPanel extends JPanel implements ActionListener {
 
         complete = new JLabel(complete_string);
         this.add(complete);
-
-        // sets the location
-        JLabel location = new JLabel(event.getLocation());
-        this.add(location);
-
-        // sets the duration
-        Duration duration = event.getDuration();
-        int hours = Math.round(duration.getSeconds() / 3600);
-        int minutes = Math.round((duration.getSeconds() - hours * 3600) / 60);
-        String duration_string = "Event Duration = " + hours + " hours";
-        if (minutes > 0)
-            duration_string += " & " + minutes + " minutes";
-        JLabel duration_label = new JLabel(duration_string);
-        this.add(duration_label);
     }
 
     private void setSharedValues() {
-        this.add(completeButton);
         // set the name
-        JLabel name = new JLabel(event.getName());
+        String name_string = "Event Name: " + event.getName();
+        JLabel name = new JLabel(name_string);
         this.add(name);
 
         // set the date
         LocalDateTime dateTime = event.getDateTime();
-        String dateString = "" + dateTime.getDayOfMonth()
+        String dateString = "Event Date: " + dateTime.getDayOfMonth()
                 + " " + dateTime.getMonth()
                 + ", " + dateTime.getYear();
         JLabel date = new JLabel(dateString);
         this.add(date);
 
         // sets the time
-        String timeString = "" + dateTime.getHour()
+        String timeString = "Event Time: " + dateTime.getHour()
                 + ":";
         // adds the leading 0 for minutes less than 10
         if (dateTime.getMinute() < 10)

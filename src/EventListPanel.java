@@ -6,8 +6,10 @@ import java.awt.*;
 import java.awt.event.ItemListener;
 import java.awt.event.ItemEvent;
 import java.time.LocalDateTime;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 
-public class EventListPanel extends JPanel implements ItemListener {
+public class EventListPanel extends JPanel {
     ArrayList<Event> allEvents = new ArrayList<>();
     ArrayList<Event> filteredEvents = new ArrayList<>();
 
@@ -15,11 +17,10 @@ public class EventListPanel extends JPanel implements ItemListener {
     JPanel controlPanel;
     JPanel displayPanel;
     JComboBox<String> sortDropDown;
-    String[] dropDownBoxOptions = { "", "Name", "Date" };
+    String[] dropDownBoxOptions = { "", "Name", "Date", "Revers Name" };
     JPanel filterPanel;
     ArrayList<JCheckBox> filterDisplayboxes = new ArrayList<JCheckBox>();
     JButton addEventButton;
-    boolean[] filterFlags = {false,false,false,false,false};
 
     public EventListPanel() {
         // sets up the EventListPanel
@@ -29,47 +30,48 @@ public class EventListPanel extends JPanel implements ItemListener {
         // sets up control panel
         controlPanel = new JPanel();
         controlPanel.setLayout(new GridBagLayout());
-        controlPanel.setBackground(Color.white);
+        controlPanel.setBackground(Color.lightGray);
         setControlPanel(controlPanel);
-        GridBagConstraints control_constraints = new GridBagConstraints();
-        control_constraints.fill = GridBagConstraints.BOTH;
-        control_constraints.weightx = 0.1;
-        control_constraints.weighty = .5;
-        control_constraints.gridx = 1;
-        control_constraints.gridy = 0;
-        this.add(controlPanel, control_constraints);
+        GridBagConstraints constraints = new GridBagConstraints();
+        constraints.fill = GridBagConstraints.BOTH;
+        constraints.anchor = GridBagConstraints.PAGE_START;
+        constraints.weightx = 0;
+        constraints.weighty = 0;
+        constraints.gridx = 0;
+        constraints.gridy = 0;
+        this.add(controlPanel, constraints);
 
         // sets up the display Panel
         displayPanel = new JPanel();
-        displayPanel.setLayout(new GridLayout(0, 5));
-        displayPanel.setBackground(Color.gray);
-        GridBagConstraints constraints = new GridBagConstraints();
-        constraints.weightx = .3;
-        constraints.weighty = .5;
-        constraints.gridx = 0;
-        constraints.gridy = 0;
+        displayPanel.setLayout(new FlowLayout());
+        displayPanel.setBorder(BorderFactory.createLineBorder(Color.black));
+        displayPanel.setBackground(Color.white);
+        GridBagConstraints c = new GridBagConstraints();
+        c.fill = GridBagConstraints.BOTH;
+        c.weightx = 1;
+        c.weighty = 1;
+        c.gridx = 0;
+        c.gridy = 1;
+        this.add(displayPanel, c);
 
         eventsAdd(displayPanel, "a", LocalDateTime.now());
         eventsAdd(displayPanel, "g", LocalDateTime.now().plusSeconds(10));
         eventsAdd(displayPanel, "b", LocalDateTime.now().plusSeconds(60));
-        eventsAdd(displayPanel, "c", LocalDateTime.now().plusSeconds(40));
-        eventsAdd(displayPanel, "e", LocalDateTime.now().plusSeconds(50));
         eventsAdd(displayPanel, "d", LocalDateTime.now().plusSeconds(30));
         eventsAdd(displayPanel, "f", LocalDateTime.now().plusSeconds(20));
-        eventsAdd2(displayPanel, "meeting a", LocalDateTime.now(), LocalDateTime.now().plusMinutes(5), "here");
+        eventsAdd2(displayPanel, "meeting a", LocalDateTime.now(),
+                LocalDateTime.now().plusMinutes(5), "here");
+        eventsAdd2(displayPanel, "meeting b", LocalDateTime.now(),
+                LocalDateTime.now().plusMinutes(5), "here");
 
         filteredEvents = allEvents;
-        System.out.println("all size: " + allEvents.size() + " filtered: " + filteredEvents.size());
-        
-        setDisplayPanel();
-        this.add(displayPanel, constraints);
 
-        // adds panels to EventListPanel
-        this.add(displayPanel);
+        setDisplayPanel();
+
     }
-    
+
     private void eventsAdd2(JPanel panel, String name, LocalDateTime start, LocalDateTime end, String location) {
-        Meeting meeting = new Meeting( name, start, end, location);
+        Meeting meeting = new Meeting(name, start, end, location);
         allEvents.add(meeting);
     }
 
@@ -80,32 +82,62 @@ public class EventListPanel extends JPanel implements ItemListener {
     }
 
     private void setControlPanel(JPanel panel) {
-        JLabel title = new JLabel("Control Panel");
+        // sets the title
+        JLabel title = new JLabel("Event List");
+        title.setFont(new Font("", Font.BOLD, 20));
+        title.setHorizontalAlignment(SwingConstants.CENTER);
         GridBagConstraints title_constraints = new GridBagConstraints();
+        title_constraints.anchor = GridBagConstraints.PAGE_START;
+        title_constraints.fill = GridBagConstraints.HORIZONTAL;
         title_constraints.weightx = .3;
         title_constraints.weighty = 0;
         title_constraints.gridx = 0;
         title_constraints.gridy = 0;
+        title_constraints.gridwidth = 4;
         panel.add(title, title_constraints);
+
+        // sets the sorting label
+        JLabel sort_label = new JLabel("Sort by: ");
+        sort_label.setHorizontalAlignment(SwingConstants.RIGHT);
+        GridBagConstraints c = new GridBagConstraints();
+        c.fill = GridBagConstraints.HORIZONTAL;
+        c.weightx = 0;
+        c.weighty = 0;
+        c.gridx = 0;
+        c.gridy = 1;
+        c.ipadx = 5;
+        panel.add(sort_label, c);
 
         // sets the sorting drop down
         sortDropDown = new JComboBox<String>(dropDownBoxOptions);
-        sortDropDown.addItemListener(this);
+        sortDropDown.addItemListener(itemListener);
         GridBagConstraints sort_c = new GridBagConstraints();
-        sort_c.weightx = .3;
+        sort_c.fill = GridBagConstraints.HORIZONTAL;
+        sort_c.weightx = .1;
         sort_c.weighty = 0;
-        sort_c.gridx = 0;
+        sort_c.gridx = 1;
         sort_c.gridy = 1;
+        c.ipadx = 50;
         panel.add(sortDropDown, sort_c);
+
+        // sets the filter label
+        JLabel filter_label = new JLabel("  Filter by: ");
+        filter_label.setHorizontalAlignment(SwingConstants.RIGHT);
+        c = new GridBagConstraints();
+        c.gridx = 2;
+        c.gridy = 1;
+        panel.add(filter_label, c);
 
         // sets the filter box panel with the filter boxes
         filterPanel = new JPanel();
         filterPanel.setLayout(new GridLayout());
         GridBagConstraints filter_c = new GridBagConstraints();
-        filter_c.weightx = .3;
+        filter_c.fill = GridBagConstraints.HORIZONTAL;
+        filter_c.weightx = .1;
         filter_c.weighty = 0;
-        filter_c.gridx = 0;
-        filter_c.gridy = 2;
+        filter_c.gridx = 3;
+        filter_c.gridy = 1;
+        filter_c.ipadx = 50;
         panel.add(filterPanel, filter_c);
         // adds the check boxes to the panel
         JCheckBox remove_box = new JCheckBox("Remove Complete");
@@ -120,24 +152,36 @@ public class EventListPanel extends JPanel implements ItemListener {
         filterDisplayboxes.add(meeting_box);
 
         for (JCheckBox box : filterDisplayboxes) {
-            box.addItemListener(this);
+            box.addItemListener(itemListener);
             filterPanel.add(box);
         }
 
         // sets the new event button
         addEventButton = new JButton("New Event");
         GridBagConstraints add_c = new GridBagConstraints();
-        add_c.weightx = .3;
         add_c.weighty = 0;
         add_c.gridx = 0;
-        add_c.gridy = 3;
+        add_c.gridy = 2;
+        add_c.gridwidth = 4;
+        addEventButton.addActionListener(e -> {
+            new AddEventModal(this);
+        });
         controlPanel.add(addEventButton, add_c);
 
     }
 
+    public void addNewEvent(Event event) {
+        allEvents.add(event);
+        filteredEvents = allEvents;
+        removeFilters();
+        setDisplayPanel();
+        filterEvents();
+    }
+
     private void setDisplayPanel() {
+        displayPanel.removeAll();
         eventPanels.clear();
-        for (Event event: filteredEvents) {
+        for (Event event : filteredEvents) {
             EventPanel event_panel = new EventPanel(event);
             eventPanels.add(event_panel);
             displayPanel.add(event_panel);
@@ -145,105 +189,75 @@ public class EventListPanel extends JPanel implements ItemListener {
 
     }
 
+    private void removeFilters() {
+        for (JCheckBox box : filterDisplayboxes) {
+            box.setSelected(false);
+        }
+    }
+
     private void sortEvents() {
-            if (sortDropDown.getSelectedItem() == dropDownBoxOptions[1]) {
-                filteredEvents.sort((a, b) -> {
-                    return a.getName().compareTo(b.getName());
-                });
-            }
-            else if (sortDropDown.getSelectedItem() == dropDownBoxOptions[2]) {
-                filteredEvents.sort((a, b) -> {
-                    return a.compareTo(b);
-                });
-            }
+        // case sort by name
+        if (sortDropDown.getSelectedItem() == dropDownBoxOptions[1]) {
+            filteredEvents.sort((a, b) -> {
+                return a.getName().compareTo(b.getName());
+            });
+        }
+        // case sort by date
+        else if (sortDropDown.getSelectedItem() == dropDownBoxOptions[2]) {
+            filteredEvents.sort((a, b) -> {
+                return a.compareTo(b);
+            });
+        }
+        // case sort by revers name
+        else if (sortDropDown.getSelectedItem() == dropDownBoxOptions[3]) {
+            filteredEvents.sort((a, b) -> {
+                return b.getName().compareTo(a.getName());
+            });
+        }
     }
 
-    public void itemStateChanged(ItemEvent e) {
-        if (e.getSource() == sortDropDown) {
-            sortEvents();
-        }
-        else if (e.getSource() == filterDisplayboxes.get(0)) {
-            if (e.getStateChange() == 1) {
-                filterFlags[0] = true;
-                filterEvents();
-            }
-            else {
-                filterFlags[0] = false;
-                filterEvents();
-            }
-        }
-        else if (e.getSource() == filterDisplayboxes.get(1)) {
-            if (e.getStateChange() == 1) {
-                filterFlags[1] = true;
-                filterEvents();
-            }
-            else {
-                filterFlags[1] = false;
-                filterEvents();
-            }
-        }
-        else if (e.getSource() == filterDisplayboxes.get(2)) {
-            if (e.getStateChange() == 1) {
-                filterFlags[2] = true;
-                filterEvents();
-            }
-            else {
-                filterFlags[2] = false;
-                filterEvents();
-            }
-        }
-        else if (e.getSource() == filterDisplayboxes.get(3)) {
-            if (e.getStateChange() == 1) {
-                filterFlags[3] = true;
-                filterEvents();
-            }
-            else {
-                filterFlags[3] = false;
-                filterEvents();
-            }
-        }
-        else if (e.getSource() == filterDisplayboxes.get(4)) {
-            if (e.getStateChange() == 1) {
-                filterFlags[4] = true;
-                filterEvents();
-            }
-            else {
-                filterFlags[4] = false;
-                filterEvents();
-            }
-        }
-        else 
-            return;
+    ItemListener itemListener = new ItemListener() {
 
-        System.out.println("complete");
-        displayPanel.removeAll();
-        setDisplayPanel();
-        displayPanel.revalidate();
-    }
+        public void itemStateChanged(ItemEvent e) {
+            if (e.getSource() == sortDropDown) {
+                sortEvents();
+            } else if (filterDisplayboxes.contains(e.getSource())) {
+                filterEvents();
+            } else
+                return;
+
+            displayPanel.removeAll();
+            setDisplayPanel();
+            displayPanel.revalidate();
+        }
+    };
 
     private void filterEvents() {
 
-        System.out.println("in filter");
-        System.out.println("all size: " + allEvents.size() + " filtered: " + filteredEvents.size());
         filteredEvents = new ArrayList<>();
-        System.out.println("all size: " + allEvents.size() + " filtered: " + filteredEvents.size());
         Event temp;
+        boolean flag;
         for (int i = 0; i < allEvents.size(); i++) {
             temp = allEvents.get(i);
             // filters out the completed tasks
-            if (temp.isComplete() == filterFlags[0] && filterFlags[0]) 
+            flag = filterDisplayboxes.get(0).isSelected();
+            if (temp.isComplete() == flag && flag)
                 continue;
-            //filters out events that are not overdue
-            if (temp.getDateTime().compareTo(LocalDateTime.now()) >= 0 && filterFlags[1])
+            // filters out events that are not overdue
+            flag = filterDisplayboxes.get(1).isSelected();
+            if (temp.getDateTime().compareTo(LocalDateTime.now()) >= 0 && flag)
                 continue;
             // filters out events that are not completed
-            if (temp.isComplete() != filterFlags[2] && filterFlags[2]) 
+            flag = filterDisplayboxes.get(2).isSelected();
+            if (temp.isComplete() != flag && flag)
                 continue;
             // filters out everything but deadlines
-            if (!(temp instanceof Deadline) && filterFlags[3]) 
+            flag = filterDisplayboxes.get(3).isSelected();
+            if (!(temp instanceof Deadline) && flag)
                 continue;
             // filters out everything but meetings
-            if (!(temp instanceof Meeting) && filterFlags[4]) 
+            flag = filterDisplayboxes.get(4).isSelected();
+            if (!(temp instanceof Meeting) && flag)
                 continue;
 
             filteredEvents.add(allEvents.get(i));
@@ -251,6 +265,6 @@ public class EventListPanel extends JPanel implements ItemListener {
         sortEvents();
         displayPanel.revalidate();
         displayPanel.repaint();
-        
+
     }
 }
