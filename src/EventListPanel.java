@@ -6,9 +6,11 @@ import java.awt.*;
 import java.awt.event.ItemListener;
 import java.awt.event.ItemEvent;
 import java.time.LocalDateTime;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
 
+/**
+ * Class that is a panel that displays a list of event panels
+ * and displays a control panel for manipulating the list of events
+ */
 public class EventListPanel extends JPanel {
     ArrayList<Event> allEvents = new ArrayList<>();
     ArrayList<Event> filteredEvents = new ArrayList<>();
@@ -22,9 +24,12 @@ public class EventListPanel extends JPanel {
     ArrayList<JCheckBox> filterDisplayboxes = new ArrayList<JCheckBox>();
     JButton addEventButton;
 
+    /**
+     * Constructor for the EventListPanel object
+     * creates and displays the contents of the panel
+     */
     public EventListPanel() {
-        // sets up the EventListPanel
-        this.setBackground(Color.orange);
+        // sets the layout of itself
         this.setLayout(new GridBagLayout());
 
         // sets up control panel
@@ -54,33 +59,76 @@ public class EventListPanel extends JPanel {
         c.gridy = 1;
         this.add(displayPanel, c);
 
+        // FOR TESTING
+        // calls tester funtion to display a set of events
+        // addEventsTest(displayPanel);
+
+        // makes the all events and filtered event list the same
+        filteredEvents = allEvents;
+
+        // sets the elements inside the display panel
+        setDisplayPanel();
+
+    }
+
+    /**
+     * Testing function to add a set of events
+     */
+    private void addEventsTest(JPanel displayPanel) {
         eventsAdd(displayPanel, "a", LocalDateTime.now());
         eventsAdd(displayPanel, "g", LocalDateTime.now().plusSeconds(10));
         eventsAdd(displayPanel, "b", LocalDateTime.now().plusSeconds(60));
         eventsAdd(displayPanel, "d", LocalDateTime.now().plusSeconds(30));
         eventsAdd(displayPanel, "f", LocalDateTime.now().plusSeconds(20));
         eventsAdd2(displayPanel, "meeting a", LocalDateTime.now(),
-                LocalDateTime.now().plusMinutes(5), "here");
+                LocalDateTime.now().plusDays(5), "here");
         eventsAdd2(displayPanel, "meeting b", LocalDateTime.now(),
                 LocalDateTime.now().plusMinutes(5), "here");
-
-        filteredEvents = allEvents;
-
-        setDisplayPanel();
-
     }
 
+    /**
+     * Testing function to add a meeting
+     */
     private void eventsAdd2(JPanel panel, String name, LocalDateTime start, LocalDateTime end, String location) {
         Meeting meeting = new Meeting(name, start, end, location);
         allEvents.add(meeting);
     }
 
+    /**
+     * Testing fuction to add a deadline
+     */
     private void eventsAdd(JPanel panel, String name, LocalDateTime dateTime) {
         Deadline deadline = new Deadline(name, dateTime);
         allEvents.add(deadline);
 
     }
 
+    /**
+     * Item Listener for the filter check boxes and the sort selection box
+     */
+    ItemListener itemListener = new ItemListener() {
+
+        public void itemStateChanged(ItemEvent e) {
+            // if sort parameter changed
+            if (e.getSource() == sortDropDown) {
+                sortEvents();
+            }
+            // if a filter was changed
+            else if (filterDisplayboxes.contains(e.getSource())) {
+                filterEvents();
+            } else
+                return;
+
+            // resets the display panel and displays the new events order
+            displayPanel.removeAll();
+            setDisplayPanel();
+            displayPanel.revalidate();
+        }
+    };
+
+    /**
+     * Sets the contents of the control panel
+     */
     private void setControlPanel(JPanel panel) {
         // sets the title
         JLabel title = new JLabel("Event List");
@@ -139,6 +187,7 @@ public class EventListPanel extends JPanel {
         filter_c.gridy = 1;
         filter_c.ipadx = 50;
         panel.add(filterPanel, filter_c);
+
         // adds the check boxes to the panel
         JCheckBox remove_box = new JCheckBox("Remove Complete");
         filterDisplayboxes.add(remove_box);
@@ -151,6 +200,7 @@ public class EventListPanel extends JPanel {
         JCheckBox meeting_box = new JCheckBox("Meetings");
         filterDisplayboxes.add(meeting_box);
 
+        // adds a item listener to all of the check boxes
         for (JCheckBox box : filterDisplayboxes) {
             box.addItemListener(itemListener);
             filterPanel.add(box);
@@ -170,6 +220,9 @@ public class EventListPanel extends JPanel {
 
     }
 
+    /**
+     * Adds a new event to the list of events that are displayed
+     */
     public void addNewEvent(Event event) {
         allEvents.add(event);
         filteredEvents = allEvents;
@@ -178,6 +231,10 @@ public class EventListPanel extends JPanel {
         filterEvents();
     }
 
+    /**
+     * Sets the contents of the display panel
+     * Clears the existing contents before adding
+     */
     private void setDisplayPanel() {
         displayPanel.removeAll();
         eventPanels.clear();
@@ -189,12 +246,19 @@ public class EventListPanel extends JPanel {
 
     }
 
+    /**
+     * Resets all of the filter boxes
+     */
     private void removeFilters() {
         for (JCheckBox box : filterDisplayboxes) {
             box.setSelected(false);
         }
     }
 
+    /**
+     * Sorts all of the events by the JComboBox selected option
+     * Redisplays the events
+     */
     private void sortEvents() {
         // case sort by name
         if (sortDropDown.getSelectedItem() == dropDownBoxOptions[1]) {
@@ -216,27 +280,17 @@ public class EventListPanel extends JPanel {
         }
     }
 
-    ItemListener itemListener = new ItemListener() {
-
-        public void itemStateChanged(ItemEvent e) {
-            if (e.getSource() == sortDropDown) {
-                sortEvents();
-            } else if (filterDisplayboxes.contains(e.getSource())) {
-                filterEvents();
-            } else
-                return;
-
-            displayPanel.removeAll();
-            setDisplayPanel();
-            displayPanel.revalidate();
-        }
-    };
-
+    /**
+     * Filters the events by the checked parameters and redisplays the events
+     */
     private void filterEvents() {
-
+        // removes all elements from the filtered list of events
         filteredEvents = new ArrayList<>();
+
         Event temp;
         boolean flag;
+        // loops through each event in the all events list
+        // adds the event to the filtered list if it meets the filter criteria
         for (int i = 0; i < allEvents.size(); i++) {
             temp = allEvents.get(i);
             // filters out the completed tasks
@@ -262,6 +316,8 @@ public class EventListPanel extends JPanel {
 
             filteredEvents.add(allEvents.get(i));
         }
+
+        // sorts and displays the events
         sortEvents();
         displayPanel.revalidate();
         displayPanel.repaint();

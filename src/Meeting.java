@@ -3,11 +3,20 @@ package src;
 import java.time.LocalDateTime;
 import java.time.Duration;
 
+/**
+ * Class that holds the detail of a meeting
+ * Extends the event class
+ * Implements the Completable interface
+ */
 public class Meeting extends Event implements Completable {
     private LocalDateTime endDateTime;
     private String location;
     private boolean complete = false;
 
+    /**
+     * Default constructor
+     * Sets the date to now and the end to 1 hour from now
+     */
     public Meeting() {
         setName("default name");
         location = "default location";
@@ -16,6 +25,14 @@ public class Meeting extends Event implements Completable {
         setEndDateTime(temp);
     }
 
+    /**
+     * Parameterized constructor
+     *
+     * @param name     the name of the event
+     * @param start    the start date and time of the meeting
+     * @param end      the end data and time of the meeting
+     * @param location the locaiton of the meeting
+     */
     public Meeting(String name, LocalDateTime start, LocalDateTime end, String location) {
         setName(name);
         setDateTime(start);
@@ -35,13 +52,15 @@ public class Meeting extends Event implements Completable {
         return endDateTime;
     }
 
+    /**
+     * Gets a Duration object containing the duration of the meeting
+     *
+     * @return duration of the meeting
+     */
     public Duration getDuration() {
-        int hours = endDateTime.getHour() - getDateTime().getHour();
-        int minutes = endDateTime.getMinute() - getDateTime().getMinute();
-        int seconds = endDateTime.getSecond() - getDateTime().getSecond();
+        // gets the duration between the start and end time
+        Duration duration = Duration.between(getDateTime(), endDateTime);
 
-        int length = hours * 3600 + minutes * 60 + seconds;
-        Duration duration = Duration.ofSeconds(length);
         return duration;
     }
 
